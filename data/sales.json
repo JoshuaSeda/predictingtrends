@@ -1,0 +1,152 @@
+[
+    {
+        "sale_id": "e9c2cffb-1f4c-4759-89f3-fac7c56a9191",
+        "datetime": "2026-04-13 14:18:08",
+        "product": {
+            "name": "AMATEUR FOOTBALL JERSEY #3 (M)"
+        },
+        "product_id": 7,
+        "category": "T-shirts",
+        "quantity": 1,
+        "unit_price": 250.0,
+        "total_price": 250.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 1250.0
+    },
+    {
+        "sale_id": "1d8046de-796e-42d0-a48f-892b042e51ab",
+        "datetime": "2026-04-13 14:18:08",
+        "product": {
+            "name": "AMATEUR CLOUD HOODIE (XL)"
+        },
+        "product_id": 16,
+        "category": "Jackets",
+        "quantity": 1,
+        "unit_price": 500.0,
+        "total_price": 500.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 1250.0
+    },
+    {
+        "sale_id": "90b5d349-7195-4c70-ab3a-c5fa1386220a",
+        "datetime": "2026-04-13 14:18:08",
+        "product": {
+            "name": "AMATEUR BALLER SHORTS SNOW CAMOUFLAGE (M)"
+        },
+        "product_id": 6,
+        "category": "Shorts",
+        "quantity": 1,
+        "unit_price": 500.0,
+        "total_price": 500.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 1250.0
+    },
+    {
+        "sale_id": "f8ff8a29-e9dc-4393-938c-7de4689f0c30",
+        "datetime": "2026-04-14 08:22:00",
+        "product": {
+            "name": "AMATEUR BALLER SHORTS COMIC V2 (M)"
+        },
+        "product_id": 5,
+        "category": "Shorts",
+        "quantity": 1,
+        "unit_price": 500.0,
+        "total_price": 500.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 3050.0
+    },
+    {
+        "sale_id": "3748bfa4-df55-4a37-b868-302663528f37",
+        "datetime": "2026-04-14 08:22:00",
+        "product": {
+            "name": "Amateur Love Mesh Short (XL)"
+        },
+        "product_id": 14,
+        "category": "Shorts",
+        "quantity": 1,
+        "unit_price": 500.0,
+        "total_price": 500.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 3050.0
+    },
+    {
+        "sale_id": "b3f59924-6c84-42d2-8a29-7f27067135a1",
+        "datetime": "2026-04-14 08:22:00",
+        "product": {
+            "name": "AMATEUR MAMBA X GOAT (S)"
+        },
+        "product_id": 13,
+        "category": "Shorts",
+        "quantity": 1,
+        "unit_price": 500.0,
+        "total_price": 500.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 3050.0
+    },
+    {
+        "sale_id": "62a6f3b7-c64e-4bfa-8e9b-2b300716e905",
+        "datetime": "2026-04-14 08:22:00",
+        "product": {
+            "name": "AMATEUR FOOTBALL JERSEY #5 (S)"
+        },
+        "product_id": 4,
+        "category": "T-shirts",
+        "quantity": 1,
+        "unit_price": 250.0,
+        "total_price": 250.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 3050.0
+    },
+    {
+        "sale_id": "37304a9a-7c64-4efb-8ec5-b01d478323e4",
+        "datetime": "2026-04-14 08:22:00",
+        "product": {
+            "name": "AMATEUR FOOTBALL JERSEY #2 (S)"
+        },
+        "product_id": 3,
+        "category": "T-shirts",
+        "quantity": 1,
+        "unit_price": 300.0,
+        "total_price": 300.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 3050.0
+    },
+    {
+        "sale_id": "dd266b64-f56a-4409-a465-d2dc3cdfbb9f",
+        "datetime": "2026-04-14 08:22:00",
+        "product": {
+            "name": "HOODIE LAVANDER AMATEUR (S)"
+        },
+        "product_id": 12,
+        "category": "Jackets",
+        "quantity": 1,
+        "unit_price": 500.0,
+        "total_price": 500.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 3050.0
+    },
+    {
+        "sale_id": "92e1e34d-02e3-49ba-97e7-2ad40fd47ed8",
+        "datetime": "2026-04-14 08:22:00",
+        "product": {
+            "name": "Black OAT HOODIE (L)"
+        },
+        "product_id": 18,
+        "category": "Jackets",
+        "quantity": 1,
+        "unit_price": 500.0,
+        "total_price": 500.0,
+        "payment_method": "Cash",
+        "buyer_name": "Guest",
+        "amount_tendered": 3050.0
+    }
+]
