@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forecast</title>
+<link rel="icon" type="image/svg+xml" href="https://cdn-icons-png.flaticon.com/512/545/545546.png">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+    body {
+        background-color: #fff;
+        color: #333;
+        font-family: 'Space Mono', monospace;
+        overflow: hidden;
+        margin: 0;
+    }
+    .page-container { max-width: 1100px; margin: 40px auto; padding: 0 20px 60px; }
+    h2 { text-align: center; font-size: 2rem; color: #000; margin-bottom: 6px; }
+    .subtitle { text-align: center; color: #666; margin-bottom: 40px; font-size: 0.95rem; }
+
+    .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #ffffff;
+        padding: 20px 40px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .navbar h1 { margin: 0; font-size: 1.8em; font-weight: 800; }
+    .nav-links { list-style: none; display: flex; gap: 30px; margin: 0; padding: 0; }
+    .nav-links a { text-decoration: none; color: #1c1c1c; font-weight: 600; padding: 5px 0; }
+    .nav-links a.active { border-bottom: 3px solid #1c1c1c; }
+
+    .chart-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 28px 30px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        margin-bottom: 28px;
+    }
+    .chart-card h3 { margin: 0 0 6px 0; font-size: 1.1rem; font-weight: 700; color: #1c1c1c; }
+    .chart-card .card-sub { color: #777; font-size: 0.82rem; margin-bottom: 22px; }
+
+    .section-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #999;
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .predict-controls {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+    .predict-controls label { font-weight: 700; font-size: 0.88rem; color: #444; }
+    .predict-controls select {
+        padding: 9px 14px;
+        border: 1px solid #ddd;
+        border-radius: 7px;
+        font-size: 0.88rem;
+        font-family: 'Space Mono', monospace;
+        background: #fff;
+        cursor: pointer;
+    }
+    .btn {
+        padding: 9px 20px;
+        border: none;
+        border-radius: 7px;
+        font-size: 0.88rem;
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .btn-primary { background: #1c1c1c; color: #fff; }
+    .btn-primary:hover { background: #333; transform: translateY(-1px); }
+    .btn-outline {
+        background: transparent;
+        color: #007bff;
+        border: 2px solid #007bff;
+    }
+    .btn-outline:hover { background: #007bff; color: #fff; }
+
+    /* Prediction Table */
+    .pred-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+        margin-top: 4px;
+    }
+    .pred-table thead tr { background: #1c1c1c; color: #fff; }
+    .pred-table th { padding: 11px 14px; text-align: center; font-weight: 700; letter-spacing: 0.3px; }
+    .pred-table th:first-child { text-align: left; }
+    .pred-table td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; text-align: center; }
+    .pred-table td:first-child { text-align: left; }
+    .pred-table tbody tr:nth-child(even) { background: #fafafa; }
+    .pred-table tbody tr:hover { background: #f0f8ff; }
+    .pred-table td.cat-jackets { color: #dc3545; font-weight: 700; }
+    .pred-table td.cat-tshirts { color: #007bff; font-weight: 700; }
+    .pred-table td.cat-shorts  { color: #28a745; font-weight: 700; }
+    .pred-table td.total-col   { font-weight: 800; color: #1c1c1c; }
+
+    /* Total summary row */
+    .pred-table tr.summary-row td {
+        background: #1c1c1c;
+        color: #fff;
+        font-weight: 800;
+        font-size: 0.92rem;
+        border-top: 2px solid #000;
+        border-bottom: none;
+    }
+    .pred-table tr.summary-row td.cat-jackets { color: #ff8a95; }
+    .pred-table tr.summary-row td.cat-tshirts { color: #90caf9; }
+    .pred-table tr.summary-row td.cat-shorts  { color: #a5d6a7; }
+    .pred-table tr.summary-row td.total-col   { color: #fff; }
+
+    /* Legend Pills */
+    .legend-pills { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .legend-pill { display: flex; align-items: center; gap: 7px; font-size: 0.83rem; font-weight: 600; }
+    .pill-dot { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
+
+    /* MODAL */
+    .modal-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.55);
+        display: none;
+        justify-content: center; align-items: center;
+        backdrop-filter: blur(4px);
+        z-index: 3000;
+        overflow-y: auto;
+        padding: 20px;
+    }
+    .modal-content {
+        background: #fff;
+        border-radius: 12px;
+        width: 100%;
+        max-width: 720px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        animation: slideUp 0.3s ease;
+        position: relative;
+        max-height: 88vh;
+        display: flex;
+        flex-direction: column;
+    }
+    @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to   { transform: translateY(0);    opacity: 1; }
+    }
+    .modal-header {
+        padding: 22px 28px 16px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .modal-header h3 { margin: 0; font-size: 1.15rem; }
+    .modal-close {
+        background: none; border: none; font-size: 1.4rem;
+        cursor: pointer; color: #999; line-height: 1; padding: 0 4px;
+    }
+    .modal-close:hover { color: #333; }
+    .modal-body {
+        padding: 22px 28px;
+        overflow-y: auto;
+        flex: 1;
+        font-size: 0.9rem;
+        line-height: 1.65;
+    }
+    .modal-footer { padding: 14px 28px; border-top: 1px solid #eee; text-align: right; }
+
+    .arima-cat-block {
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 20px 22px;
+        margin-bottom: 20px;
+        border-left-width: 4px;
+    }
+    .arima-cat-block h4 { display: flex; align-items: center; gap: 8px; font-size: 1rem; margin: 0 0 8px; }
+    .cat-badge { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    .step-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1.3px;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-bottom: 10px;
+    }
+
+    .day-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+    .day-chip {
+        border-radius: 8px;
+        padding: 8px 12px;
+        text-align: center;
+        min-width: 54px;
+    }
+    .day-chip .chip-day { font-size: 0.68rem; color: #888; }
+    .day-chip .chip-val { font-size: 1rem; font-weight: 800; }
+
+    /* LOADING SCREEN */
+    #loading-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: #f4f7f9;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        z-index: 9999;
+        transition: opacity 0.6s ease-out, visibility 0.6s;
+    }
+    .loader-container { position: relative; width: 120px; height: 120px; display: flex; justify-content: center; align-items: center; }
+    .apparel-icon { position: absolute; width: 80px; height: 80px; opacity: 0; transform: scale(0.5) translateY(20px); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .apparel-icon.active { opacity: 1; transform: scale(1) translateY(0); }
+    .apparel-icon.exit  { opacity: 0; transform: scale(1.1) translateY(-30px); }
+    .icon-shirt path  { fill: #007bff; }
+    .icon-shorts path { fill: #28a745; }
+    .icon-jacket path { fill: #dc3545; }
+    .loading-text { margin-top: 20px; font-family: 'Inter', sans-serif; font-weight: 600; color: #555; letter-spacing: 1px; text-transform: uppercase; font-size: 0.9em; }
+    .progress-container { width: 200px; height: 4px; background-color: #e0e0e0; border-radius: 2px; margin-top: 15px; overflow: hidden; }
+    .progress-bar { height: 100%; width: 0%; background-color: #1c1c1c; border-radius: 2px; transition: width 0.1s linear; }
+
+    /* ARIMA Parameters Panel */
+    .params-panel {
+        background: #f8f9fa;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 18px;
+        font-size: 0.85rem;
+    }
+    .params-panel-title {
+        font-weight: 700;
+        font-size: 0.78rem;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: #888;
+        margin-bottom: 12px;
+    }
+    .params-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 10px;
+    }
+    .param-item {
+        background: #fff;
+        border: 1px solid #e8e8e8;
+        border-radius: 8px;
+        padding: 10px 14px;
+    }
+    .param-label { font-size: 0.75rem; color: #888; font-weight: 600; margin-bottom: 4px; }
+    .param-value { font-size: 0.95rem; font-weight: 800; color: #1c1c1c; font-family: 'Space Mono', monospace; }
+    .param-sub   { font-size: 0.72rem; color: #aaa; margin-top: 2px; }
+
+    .formula-box {
+        background: #fffbe6;
+        border: 1px solid #ffe082;
+        border-radius: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        font-size: 0.82rem;
+        font-family: 'Space Mono', monospace;
+        line-height: 1.9;
+        color: #555;
+    }
+    .formula-box strong { color: #1c1c1c; }
+</style>
+</head>
+<body>
+
+<!-- LOADING SCREEN -->
+<div id="loading-overlay">
+    <div class="loader-container">
+        <svg class="apparel-icon icon-shirt" viewBox="0 0 512 512">
+            <path d="M376,128H336V96a16,16,0,0,0-16-16H192a16,16,0,0,0-16,16v32H136a40,40,0,0,0-40,40v64a8,8,0,0,0,8,8h40V424a24,24,0,0,0,24,24H344a24,24,0,0,0,24-24V240h40a8,8,0,0,0,8-8V168A40,40,0,0,0,376,128Z"/>
+        </svg>
+        <svg class="apparel-icon icon-shorts" viewBox="0 0 512 512">
+            <path d="M392,112H120a24,24,0,0,0-24,24V344a24,24,0,0,0,24,24h88v-80h96v80h88a24,24,0,0,0,24-24V136A24,24,0,0,0,392,112Z"/>
+        </svg>
+        <svg class="apparel-icon icon-jacket" viewBox="0 0 512 512">
+            <path d="M408.6,147.4l-56-88A16,16,0,0,0,339.1,52H172.9a16,16,0,0,0-13.5,7.4l-56,88A32,32,0,0,0,96,164.6V428a20,20,0,0,0,20,20H396a20,20,0,0,0,20-20V164.6A32,32,0,0,0,408.6,147.4Z"/>
+        </svg>
+    </div>
+    <div class="loading-text" id="loading-text">Loading...</div>
+    <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
+</div>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <h1>Forecast</h1>
+    <ul class="nav-links">
+        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
+        <li><a href="{{ url_for('sales') }}">Sales</a></li>
+        <li><a href="{{ url_for('forecast') }}" class="active">Forecast</a></li>
+        <li><a href="{{ url_for('pos') }}">POS</a></li>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    </ul>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="page-container">
+    <h2>Sales Forecast</h2>
+
+    <!-- SECTION 1: BAR CHART (rolling last 7 days) -->
+    <div class="chart-card">
+        <h3>📊 Actual Sales — Last 7 Days</h3>
+        <div class="legend-pills">
+            <div class="legend-pill"><span class="pill-dot" style="background:#dc3545;"></span> Jackets</div>
+            <div class="legend-pill"><span class="pill-dot" style="background:#007bff;"></span> T-shirts</div>
+            <div class="legend-pill"><span class="pill-dot" style="background:#28a745;"></span> Shorts</div>
+        </div>
+        <canvas id="salesBarChart" height="340"></canvas>
+    </div>
+
+    <!-- SECTION 2: ARIMA PREDICTOR -->
+    <div class="chart-card">
+        <h3>Predict Future Sales</h3>
+
+        <div class="predict-controls">
+            <label for="forecastDuration">Forecast Duration:</label>
+            <select id="forecastDuration">
+                <option value="1">Tomorrow (1 day)</option>
+                <option value="7" selected>Next 7 Days</option>
+                <option value="14">Next 14 Days</option>
+                <option value="21">Next 21 Days</option>
+                <option value="28">Next 28 Days</option>
+            </select>
+            <button class="btn btn-primary" onclick="runPrediction()">Predict</button>
+            <button class="btn btn-outline" id="summaryBtn" style="display:none;" onclick="showSummary()">📋 Summary</button>
+        </div>
+
+        <div id="predictionResults" style="display:none;">
+            <!-- Auto-Calculated Parameters Display (mirrors Excel table) -->
+            <div class="params-panel" id="paramsPanel"></div>
+
+            <div class="section-label" style="margin-top:8px;">Predicted Daily Sales</div>
+            <div style="overflow-x:auto;">
+                <table class="pred-table" id="predTable">
+                    <thead>
+                        <tr>
+                            <th style="text-align:left;">Date</th>
+                            <th style="color:#ff8a95;">Jackets</th>
+                            <th style="color:#90caf9;">T-shirts</th>
+                            <th style="color:#a5d6a7;">Shorts</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody id="predTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ARIMA SUMMARY MODAL -->
+<div class="modal-overlay" id="summaryModal" onclick="handleModalClick(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-header">
+            <h3>📋 Forecast Summary</h3>
+            <button class="modal-close" onclick="closeSummary()">×</button>
+        </div>
+        <div class="modal-body" id="summaryBody"></div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" onclick="closeSummary()">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ============================================================
+// LOADING SCREEN
+// ============================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay     = document.getElementById('loading-overlay');
+    const icons       = document.querySelectorAll('.apparel-icon');
+    const progressBar = document.getElementById('progress-bar');
+    const loadingText = document.getElementById('loading-text');
+
+    const texts = ["Loading...", "Preparing Data...", "Almost Ready..."];
+    let idx = 0;
+    const totalTime    = 2000;
+    const intervalTime = 600;
+
+    icons[0].classList.add('active');
+    loadingText.innerText = texts[0];
+
+    const cycleIcons = setInterval(() => {
+        icons[idx].classList.remove('active');
+        icons[idx].classList.add('exit');
+        idx = (idx + 1) % icons.length;
+        icons[idx].classList.remove('exit');
+        icons[idx].classList.add('active');
+        loadingText.innerText = texts[idx];
+    }, intervalTime);
+
+    let progress = 0;
+    const progressInterval = setInterval(() => {
+        progress = Math.min(progress + 3, 100);
+        progressBar.style.width = `${progress}%`;
+    }, totalTime / 35);
+
+    setTimeout(() => {
+        clearInterval(cycleIcons);
+        clearInterval(progressInterval);
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.style.visibility = 'hidden';
+            document.body.style.overflowY = 'auto';
+        }, 600);
+    }, totalTime);
+});
+
+// ============================================================
+// DATA FROM FLASK
+// ============================================================
+const dailyData      = {{ daily_data | tojson }};       // 7 rolling days — bar chart
+const predictionData = {{ prediction_data | tojson }};  // 7 rolling days — ARIMA input
+
+const CATEGORIES = ["Jackets", "T-shirts", "Shorts"];
+const CAT_COLORS = { "Jackets": "#dc3545", "T-shirts": "#007bff", "Shorts": "#28a745" };
+const CAT_ALPHA  = { "Jackets": "rgba(220,53,69,0.80)", "T-shirts": "rgba(0,123,255,0.80)", "Shorts": "rgba(40,167,69,0.80)" };
+
+const sortedDates     = Object.keys(dailyData).sort();
+const predSortedDates = Object.keys(predictionData).sort();
+
+// ============================================================
+// BAR CHART — ACTUAL SALES (rolling last 7 days)
+// ============================================================
+const barLabels = sortedDates.map(d => {
+    const dt = new Date(d + 'T00:00:00');
+    return dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+});
+
+const barDatasets = CATEGORIES.map(cat => ({
+    label: cat,
+    data: sortedDates.map(d => dailyData[d][cat] || 0),
+    backgroundColor: CAT_ALPHA[cat],
+    borderColor: CAT_COLORS[cat],
+    borderWidth: 1.5,
+    borderRadius: 5,
+    borderSkipped: false
+}));
+
+const barCtx = document.getElementById('salesBarChart').getContext('2d');
+new Chart(barCtx, {
+    type: 'bar',
+    data: { labels: barLabels, datasets: barDatasets },
+    options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} unit${ctx.raw !== 1 ? 's' : ''}`
+                }
+            }
+        },
+        scales: {
+            x: {
+                title: { display: true, text: 'Date', font: { weight: '600' } },
+                grid: { display: false }
+            },
+            y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Units Sold', font: { weight: '600' } },
+                ticks: { stepSize: 1, precision: 0 }
+            }
+        }
+    }
+});
+
+// ============================================================
+// EXCEL-MATCHING ARIMA-STYLE FORECAST
+// ============================================================
+// Replicates the exact Excel formula:
+//   =LastRaw + μ + φ*(LastRaw - PrevRaw) + θ*LastError
+//
+// Parameters (auto-calculated from sales history):
+//   μ (Mu)    = average of daily differences (avg change per day)
+//   φ (Phi)   = 0.300  (fixed momentum factor, as in Excel)
+//   θ (Theta) = 0.500  (fixed error correction factor, as in Excel)
+//   LastError = 0.000  (seed, stays 0 — matches Excel G$6 never updating)
+//
+// The raw value carries forward with full precision (no early rounding).
+// The displayed integer = Math.round(raw) per day.
+// ============================================================
+
+const PHI_FIXED   = 0.300;
+const THETA_FIXED = 0.500;
+const ERROR_SEED  = 0.000;   // G$6 in Excel — constant 0, never updates
+
+/**
+ * Compute μ (average daily change) from the sales data array.
+ * Mirrors how Excel auto-calculates G$3 from the actual sales column.
+ */
+function computeMu(data) {
+    if (data.length < 2) return 0;
+    let sumDiff = 0;
+    for (let i = 1; i < data.length; i++) sumDiff += data[i] - data[i - 1];
+    return sumDiff / (data.length - 1);
+}
+
+/**
+ * Forecast `steps` days ahead using the Excel formula:
+ *   NextRaw = PrevRaw + μ + φ*(PrevRaw - PrevPrevRaw) + θ*lastError
+ *
+ * Notes:
+ * - lastError is seeded at 0 and NOT updated between steps (matches Excel G$6=0.000 constant).
+ * - Raw values carry full float precision between steps; only displayed values are rounded.
+ * - Returns array of { raw, rounded } objects for each future day.
+ */
+function excelForecast(data, mu, steps) {
+    if (data.length < 2) {
+        return Array(steps).fill({ raw: 0, rounded: 0 });
+    }
+
+    // Seed from the last two actual data points
+    let prevPrevRaw = data[data.length - 2];   // B8 equivalent
+    let prevRaw     = data[data.length - 1];   // B9 equivalent
+    const lastError = ERROR_SEED;              // G$6 — always 0
+
+    const results = [];
+
+    for (let s = 0; s < steps; s++) {
+        // Excel formula: =prevRaw + G$3 + G$4*(prevRaw - prevPrevRaw) + G$5*G$6
+        const raw     = prevRaw + mu + PHI_FIXED * (prevRaw - prevPrevRaw) + THETA_FIXED * lastError;
+        const rounded = Math.max(0, Math.round(raw));
+
+        results.push({ raw, rounded });
+
+        // Roll forward — use raw (not rounded) for precision, matching Excel cell references
+        prevPrevRaw = prevRaw;
+        prevRaw     = raw;
+    }
+
+    return results;
+}
+
+// Store last run for summary modal
+let lastForecastParams = null;
+let lastForecastPreds  = null;
+let lastSteps          = 0;
+
+function runPrediction() {
+    const steps = parseInt(document.getElementById('forecastDuration').value);
+    lastSteps = steps;
+
+    const params = {};
+    const preds  = {};
+
+    const last7Dates = predSortedDates.slice(-7);
+
+    for (const cat of CATEGORIES) {
+        const catData = last7Dates.map(d => predictionData[d][cat] || 0);
+        const mu      = computeMu(catData);
+
+        params[cat] = { catData, mu, phi: PHI_FIXED, theta: THETA_FIXED, lastError: ERROR_SEED };
+        preds[cat]  = excelForecast(catData, mu, steps);
+    }
+
+    lastForecastParams = params;
+    lastForecastPreds  = preds;
+
+    renderParamsPanel(params);
+    renderPredTable(preds, steps);
+
+    document.getElementById('predictionResults').style.display = 'block';
+    document.getElementById('summaryBtn').style.display        = 'inline-block';
+}
+
+/**
+ * Render the auto-calculated parameters panel — mirrors the Excel
+ * "ARIMA-STYLE PARAMETERS (Auto-Calculated)" table on the right side.
+ */
+function renderParamsPanel(params) {
+    const panel = document.getElementById('paramsPanel');
+    const rows = CATEGORIES.map(cat => {
+        const p = params[cat];
+        const color = CAT_COLORS[cat];
+        return `
+        <div class="param-item" style="border-top:3px solid ${color};">
+            <div class="param-label" style="color:${color};">${cat}</div>
+            <div class="param-value">μ = ${p.mu.toFixed(3)}</div>
+            <div class="param-sub">φ = ${p.phi.toFixed(3)} &nbsp;|&nbsp; θ = ${p.theta.toFixed(3)} &nbsp;|&nbsp; Err = ${p.lastError.toFixed(3)}</div>
+        </div>`;
+    }).join('');
+
+
+}
+
+function renderPredTable(preds, steps) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const tbody = document.getElementById('predTableBody');
+    tbody.innerHTML = '';
+
+    let totalJackets = 0, totalTshirts = 0, totalShorts = 0;
+
+    for (let i = 0; i < steps; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() + i + 1);
+        const dateLabel = d.toLocaleDateString('en-US', {
+            weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+        });
+
+        const jackets = preds['Jackets'][i].rounded;
+        const tshirts = preds['T-shirts'][i].rounded;
+        const shorts  = preds['Shorts'][i].rounded;
+        const total   = jackets + tshirts + shorts;
+
+        totalJackets += jackets;
+        totalTshirts += tshirts;
+        totalShorts  += shorts;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${dateLabel}</td>
+            <td class="cat-jackets">${jackets}</td>
+            <td class="cat-tshirts">${tshirts}</td>
+            <td class="cat-shorts">${shorts}</td>
+            <td class="total-col">${total}</td>
+        `;
+        tbody.appendChild(row);
+    }
+
+    if (steps > 1) {
+        const durationLabel = { 7: '7-Day', 14: '14-Day', 21: '21-Day', 28: '28-Day' }[steps] || `${steps}-Day`;
+        const grandTotal = totalJackets + totalTshirts + totalShorts;
+        const summaryRow = document.createElement('tr');
+        summaryRow.className = 'summary-row';
+        summaryRow.innerHTML = `
+            <td>📦 ${durationLabel} TOTAL</td>
+            <td class="cat-jackets">${totalJackets}</td>
+            <td class="cat-tshirts">${totalTshirts}</td>
+            <td class="cat-shorts">${totalShorts}</td>
+            <td class="total-col">${grandTotal}</td>
+        `;
+        tbody.appendChild(summaryRow);
+    }
+}
+
+// ============================================================
+// SUMMARY MODAL
+// ============================================================
+function showSummary() {
+    if (!lastForecastParams) return;
+
+    const durationLabel = {
+        1: 'Tomorrow', 7: 'Next 7 Days',
+        14: 'Next 14 Days', 21: 'Next 21 Days', 28: 'Next 28 Days'
+    }[lastSteps] || `Next ${lastSteps} Days`;
+
+    let html = `
+    <div style="background:#fffbe6;border:1px solid #ffe082;border-radius:10px;padding:18px 20px;margin-bottom:24px;">
+        <div style="font-size:1.05rem;font-weight:800;margin-bottom:8px;">📐 Excel-Matched Forecast Formula</div>
+        <div style="font-family:'Space Mono',monospace;background:#fff;border:1px solid #ddd;border-radius:6px;padding:12px 16px;font-size:0.82rem;line-height:2.1;">
+            <span style="color:#888;">NextRaw =</span> PrevRaw<br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <strong>μ</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888;">(avg daily change — auto from data)</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <strong>φ</strong> × (PrevRaw − PrevPrevRaw) &nbsp;<span style="color:#888;">(momentum, φ=0.300)</span><br>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ <strong>θ</strong> × LastError &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color:#888;">(error correction, θ=0.500, seed=0)</span>
+        </div>
+        <p style="margin:10px 0 0;font-size:0.82rem;color:#666;">
+            Raw values carry full float precision between steps (no early rounding),
+            then <strong>rounded to nearest integer</strong> for display — exactly as Excel does.
+        </p>
+    </div>
+
+    <div style="font-size:0.78rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#999;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid #eee;">
+        📦 Step-by-Step — ${durationLabel}
+    </div>`;
+
+    for (const cat of CATEGORIES) {
+        const p     = lastForecastParams[cat];
+        const color = CAT_COLORS[cat];
+        const { catData, mu, phi, theta, lastError } = p;
+        const hasData = catData.some(v => v > 0);
+
+        // Show last 7 days chips
+        const displayDates = predSortedDates.slice(-7);
+        const chipsHtml = displayDates.map(d => {
+            const dt  = new Date(d + 'T00:00:00');
+            const wday = dt.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+            const val = predictionData[d][cat] || 0;
+            return `<div class="day-chip" style="border:1px solid ${color}22;background:${color}0d;">
+                        <div class="chip-day" style="font-size:0.62rem;">${wday}</div>
+                        <div class="chip-val" style="color:${color};">${val}</div>
+                    </div>`;
+        }).join('');
+
+        // Build step-by-step chain (show up to 3 days)
+        const previewDays = Math.min(lastSteps, 3);
+        let chainRows = '';
+
+        if (hasData && catData.length >= 2) {
+            let prevPrevRaw = catData[catData.length - 2];
+            let prevRaw     = catData[catData.length - 1];
+            const errSeed   = ERROR_SEED;
+
+            for (let i = 0; i < previewDays; i++) {
+                const muTerm    = mu;
+                const phiTerm   = phi * (prevRaw - prevPrevRaw);
+                const thetaTerm = theta * errSeed;
+                const nextRaw   = prevRaw + muTerm + phiTerm + thetaTerm;
+                const nextInt   = Math.max(0, Math.round(nextRaw));
+
+                const futureDate = new Date();
+                futureDate.setDate(futureDate.getDate() + i + 1);
+                const futureDateLabel = futureDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+                const srcLabel = i === 0
+                    ? `Seeded from actual last value: <strong>${prevRaw.toFixed(2)}</strong>`
+                    : `Carried from Day ${i} raw: <strong>${prevRaw.toFixed(4)}</strong>`;
+
+                const changeSigned = (muTerm + phiTerm + thetaTerm) >= 0
+                    ? `+${(muTerm + phiTerm + thetaTerm).toFixed(4)}`
+                    : (muTerm + phiTerm + thetaTerm).toFixed(4);
+
+                chainRows += `
+                <div style="border:1px solid #e8e8e8;border-radius:8px;padding:12px 14px;margin-bottom:10px;background:${i===0?color+'08':'#fafafa'};">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <strong style="font-size:0.88rem;">Day ${i+1} — ${futureDateLabel}</strong>
+                        <span style="font-size:1rem;font-weight:800;color:${color};">${nextInt} units</span>
+                    </div>
+                    <div style="font-size:0.79rem;color:#666;line-height:1.9;font-family:'Space Mono',monospace;">
+                        ${srcLabel}<br>
+                        <span style="color:#888;">μ(${muTerm.toFixed(4)}) + φ(${phi})×(${prevRaw.toFixed(4)}−${prevPrevRaw.toFixed(4)}) + θ(${theta})×${errSeed}</span><br>
+                        Change = <strong>${changeSigned}</strong><br>
+                        Raw = ${prevRaw.toFixed(4)} ${changeSigned} = <strong>${nextRaw.toFixed(4)}</strong> → rounded = <strong style="color:${color};">${nextInt}</strong>
+                    </div>
+                </div>`;
+
+                prevPrevRaw = prevRaw;
+                prevRaw     = nextRaw;
+            }
+        }
+
+        if (lastSteps > 3) {
+            chainRows += `<div style="text-align:center;font-size:0.8rem;color:#aaa;padding:8px;">… continues the same way for all ${lastSteps} days</div>`;
+        }
+
+        html += `
+        <div class="arima-cat-block" style="border-left:4px solid ${color};">
+            <h4><span class="cat-badge" style="background:${color};"></span>${cat}
+                ${!hasData ? '<span style="font-size:0.75rem;color:#aaa;font-weight:400;margin-left:6px;">(no history — predicting 0)</span>' : ''}
+            </h4>
+
+            <div class="step-label">📅 Last 7 Days of Actual Sales</div>
+            <div class="day-chips">${chipsHtml}</div>
+
+            ${hasData ? `
+            <div class="step-label" style="margin-top:16px;">⚙️ Auto-Calculated Parameters</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;">
+                <div style="background:#f8f9fa;border-radius:6px;padding:8px 14px;font-size:0.83rem;border-left:3px solid ${color};">
+                    <div style="color:#888;font-size:0.72rem;text-transform:uppercase;">μ (Mu Avg Change)</div>
+                    <div style="font-weight:800;">${mu.toFixed(3)}</div>
+                </div>
+                <div style="background:#f8f9fa;border-radius:6px;padding:8px 14px;font-size:0.83rem;border-left:3px solid #888;">
+                    <div style="color:#888;font-size:0.72rem;text-transform:uppercase;">φ (Phi Momentum)</div>
+                    <div style="font-weight:800;">${phi.toFixed(3)}</div>
+                </div>
+                <div style="background:#f8f9fa;border-radius:6px;padding:8px 14px;font-size:0.83rem;border-left:3px solid #888;">
+                    <div style="color:#888;font-size:0.72rem;text-transform:uppercase;">θ (Theta Error Corr.)</div>
+                    <div style="font-weight:800;">${theta.toFixed(3)}</div>
+                </div>
+                <div style="background:#f8f9fa;border-radius:6px;padding:8px 14px;font-size:0.83rem;border-left:3px solid #888;">
+                    <div style="color:#888;font-size:0.72rem;text-transform:uppercase;">Last Error Seed</div>
+                    <div style="font-weight:800;">${lastError.toFixed(3)}</div>
+                </div>
+            </div>
+
+            <div class="step-label">🔢 Step-by-Step Calculation</div>
+            ${chainRows}
+            ` : `
+            <div style="background:#fff3f3;border:1px solid #fcc;border-radius:6px;padding:12px 14px;font-size:0.85rem;color:#888;">
+                ⚠️ No sales recorded in the last 7 days for <strong>${cat}</strong>. Predicting <strong>0 units/day</strong>.
+            </div>`}
+        </div>`;
+    }
+
+    document.getElementById('summaryBody').innerHTML = html;
+    document.getElementById('summaryModal').style.display = 'flex';
+}
+
+function closeSummary() { document.getElementById('summaryModal').style.display = 'none'; }
+function handleModalClick(e) { if (e.target === document.getElementById('summaryModal')) closeSummary(); }
+</script>
+</body>
+</html>
