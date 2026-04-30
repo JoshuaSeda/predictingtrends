@@ -9,6 +9,8 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 <style>
+    * { box-sizing: border-box; }
+
     :root {
         --primary-color: #007bff;
         --accent-color: #28a745;
@@ -36,6 +38,8 @@
         background-color: #ffffff;
         padding: 20px 40px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        position: relative;
+        z-index: 20;
     }
     .navbar h1 { margin: 0; font-size: 1.8em; font-weight: 800; }
     .nav-links { list-style: none; display: flex; gap: 30px; margin: 0; padding: 0; }
@@ -45,7 +49,8 @@
     .page-container { max-width: 1400px; margin: 40px auto; padding: 0 20px; }
     h2 { font-size: 2.2em; font-weight: 800; color: #000; margin-bottom: 30px; text-align: center; }
 
-    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background-color: #fff; border: 1px solid #eee; }
+    .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; background-color: #fff; border: 1px solid #eee; min-width: 700px; }
     th, td { padding: 15px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; color: #000; }
     th { background-color: var(--primary-color); color: #ffffff; font-weight: 700; text-transform: uppercase; font-size: 0.9em; }
 
@@ -57,7 +62,7 @@
     input.id-input { text-align: center; font-weight: bold; }
 
     .stock-cell { min-width: 200px; }
-    .size-inputs { display: flex; justify-content: center; gap: 8px; }
+    .size-inputs { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
     .size-inputs label { display: flex; flex-direction: column; align-items: center; font-size: 0.8em; font-weight: 700; color: #555; }
     .size-inputs input[type="number"] { width: 50px !important; padding: 6px !important; text-align: center; font-size: 0.9em; }
 
@@ -82,13 +87,12 @@
     .add-row-btn { background-color: #28a745; color: #ffffff; padding: 8px 14px; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 0.85em; display: flex; align-items: center; gap: 5px; margin: 0 auto; }
     .add-row-btn:hover { background-color: #218838; }
 
-    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.8); backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 2000; }
-    .modal-content { background-color: #ffffff; padding: 30px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-width: 400px; text-align: center; }
+    .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255,255,255,0.8); backdrop-filter: blur(2px); display: none; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+    .modal-content { background-color: #ffffff; padding: 30px; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
     .modal-buttons { margin-top: 20px; display: flex; justify-content: center; gap: 15px; }
     .confirm-btn { background-color: var(--danger-color); color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
     .cancel-btn { background-color: #eee; color: #333; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
 
-    /* LOADING SCREEN — standardized */
     #loading-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background-color: #f4f7f9;
@@ -106,11 +110,42 @@
     .loading-text { margin-top: 20px; font-family: 'Inter', sans-serif; font-weight: 600; color: #555; letter-spacing: 1px; text-transform: uppercase; font-size: 0.9em; }
     .progress-container { width: 200px; height: 4px; background-color: #e0e0e0; border-radius: 2px; margin-top: 15px; overflow: hidden; }
     .progress-bar { height: 100%; width: 0%; background-color: #1c1c1c; border-radius: 2px; transition: width 0.1s linear; }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 768px) {
+        body { overflow-x: hidden; }
+        .navbar { padding: 15px 20px; flex-wrap: wrap; }
+        .navbar h1 { font-size: 1.3em; }
+        .nav-links {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            gap: 0;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+        .nav-links.open { display: flex; }
+        .nav-links li { width: 100%; }
+        .nav-links a { display: block; padding: 10px 0; }
+        .nav-links a.active { border-bottom: none; font-weight: 800; color: #007bff; }
+        .nav-toggle { display: flex; }
+
+        .page-container { margin: 20px auto; }
+        h2 { font-size: 1.5em; margin-bottom: 16px; }
+        .save-btn { width: 100%; }
+        .table-responsive { border-radius: 8px; }
+    }
+
+    @media (max-width: 480px) {
+        h2 { font-size: 1.3em; }
+        th, td { padding: 10px 8px; font-size: 0.85em; }
+        .size-inputs input[type="number"] { width: 40px !important; }
+    }
 </style>
 </head>
 <body>
 
-<!-- LOADING SCREEN -->
 <div id="loading-overlay">
     <div class="loader-container">
         <svg class="apparel-icon icon-shirt" viewBox="0 0 512 512">
@@ -127,7 +162,6 @@
     <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
 </div>
 
-<!-- CONFIRM REMOVE MODAL -->
 <div id="removeModal" class="modal">
     <div class="modal-content">
         <h3 style="color: var(--danger-color); margin-top:0;">Confirm Removal</h3>
@@ -139,9 +173,11 @@
     </div>
 </div>
 
-<!-- NAVBAR -->
 <div class="navbar">
     <h1>Inventory Admin</h1>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+    </button>
     <ul class="nav-links">
         <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
         <li><a href="{{ url_for('inventory') }}" class="active">Inventory</a></li>
@@ -156,6 +192,7 @@
     <h2>Inventory Management</h2>
 
     <form method="POST" id="inventoryForm">
+        <div class="table-responsive">
         <table id="inventoryTable">
             <thead>
                 <tr>
@@ -210,7 +247,6 @@
                 </tr>
                 {% endfor %}
 
-                <!-- NEW ITEM ROW -->
                 <tr class="new-item-row">
                     <td style="text-align: center; color: #999;">New</td>
                     <td class="image-col" style="color: #999; font-size: 0.8em;">(Auto)</td>
@@ -239,11 +275,17 @@
                 </tr>
             </tbody>
         </table>
+        </div>
         <button type="submit" class="save-btn">💾 Save Changes</button>
     </form>
 </div>
 
 <script>
+    // NAV TOGGLE
+    document.getElementById('navToggle').addEventListener('click', function() {
+        document.querySelector('.nav-links').classList.toggle('open');
+    });
+
     // LOADING SCREEN
     document.addEventListener('DOMContentLoaded', () => {
         const overlay     = document.getElementById('loading-overlay');

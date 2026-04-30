@@ -36,7 +36,6 @@
     }
     .page-header h2 { margin: 0; font-size: 2rem; color: #000; }
 
-    /* ── WEEK CARDS ── */
     .weeks-container { display: flex; flex-direction: column; gap: 14px; }
 
     .week-card {
@@ -67,7 +66,6 @@
     .chevron    { font-size: 1.1rem; color: #bbb; transition: transform 0.25s; }
     .week-card.open .chevron { transform: rotate(180deg); }
 
-    /* ── FORECAST LINK BUTTON ── */
     .btn-forecast {
         display: inline-flex; align-items: center; gap: 5px;
         padding: 6px 14px; border-radius: 20px;
@@ -88,7 +86,6 @@
     .week-card.open .week-body { display: block; animation: fadeIn 0.2s ease; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
 
-    /* ── TABS ── */
     .week-tabs {
         display: flex; gap: 0; border-bottom: 2px solid #eee;
         margin-bottom: 18px; margin-top: 16px;
@@ -103,7 +100,6 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* ── POS TABLE ── */
     table.sales-table { width:100%; border-collapse:collapse; background:#fff; border:1px solid #eee; border-radius:10px; overflow:hidden; margin-top:4px; }
     table.sales-table th { background:#007bff; color:#fff; font-weight:700; text-transform:uppercase; padding:12px 14px; text-align:center; font-size:0.82rem; }
     table.sales-table td { padding:11px 14px; border-bottom:1px solid #f0f0f0; text-align:center; color:#333; font-size:0.88rem; }
@@ -126,7 +122,6 @@
     }
     .delete-sale-btn:hover { background:#b02020; }
 
-    /* ── MANUAL ENTRY ── */
     .manual-form-wrapper { overflow-x:auto; }
     .manual-grid { width:100%; border-collapse:collapse; min-width:520px; }
     .manual-grid th { background:#1c1c1c; color:#fff; padding:10px 14px; font-size:0.8rem; font-weight:700; text-align:center; }
@@ -162,10 +157,8 @@
     }
     .manual-note { font-size:0.76rem; color:#aaa; }
 
-    /* info box */
     .info-box { background:#f0f7ff; border:1px solid #bee3f8; border-radius:8px; padding:12px 16px; font-size:0.8rem; color:#004a8c; margin-bottom:16px; }
 
-    /* ── RECEIPT MODAL ── */
     .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); display:none; justify-content:center; align-items:center; backdrop-filter:blur(4px); z-index:2000; }
     .modal-content { background:#fff; padding:0; border-radius:8px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.2); width:350px; animation:slideUp 0.3s ease; }
     @keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
@@ -174,7 +167,6 @@
     .close-btn { width:100%; background:#6c757d; color:#fff; border:none; padding:10px; border-radius:4px; cursor:pointer; font-weight:bold; font-family:'Space Mono',monospace; }
     .close-btn:hover { background:#545b62; }
 
-    /* ── DELETE MODAL ── */
     .del-modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; justify-content:center; align-items:center; z-index:3000; backdrop-filter:blur(3px); }
     .del-modal-box { background:#fff; border-radius:10px; padding:28px; max-width:380px; width:90%; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.2); animation:slideUp 0.25s ease; }
     .del-modal-box h3 { color:#dc3545; margin-top:0; }
@@ -184,7 +176,6 @@
     .del-confirm-btn:hover { background:#b02020; }
     .del-cancel-btn  { background:#eee; color:#333; border:none; padding:10px 24px; border-radius:6px; font-weight:700; cursor:pointer; font-family:'Space Mono',monospace; }
 
-    /* ── LOADING ── */
     #loading-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background-color:#f4f7f9; display:flex; flex-direction:column; justify-content:center; align-items:center; z-index:9999; transition:opacity 0.6s ease-out, visibility 0.6s; }
     .loader-container { position:relative; width:120px; height:120px; display:flex; justify-content:center; align-items:center; }
     .apparel-icon { position:absolute; width:80px; height:80px; opacity:0; transform:scale(0.5) translateY(20px); transition:all 0.5s cubic-bezier(0.34,1.56,0.64,1); }
@@ -196,11 +187,72 @@
     .loading-text { margin-top:20px; font-family:'Inter',sans-serif; font-weight:600; color:#555; letter-spacing:1px; text-transform:uppercase; font-size:0.9em; }
     .progress-container { width:200px; height:4px; background-color:#e0e0e0; border-radius:2px; margin-top:15px; overflow:hidden; }
     .progress-bar { height:100%; width:0%; background-color:#1c1c1c; border-radius:2px; transition:width 0.1s linear; }
+
+    .nav-toggle {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .nav-toggle span {
+        display: block;
+        width: 25px;
+        height: 2px;
+        background: #1c1c1c;
+        border-radius: 2px;
+    }
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 768px) {
+        body { overflow-x: hidden; }
+        .navbar { padding: 15px 20px; flex-wrap: wrap; }
+        .navbar h1 { font-size: 1.3em; }
+        .nav-links {
+            display: none !important;
+            flex-direction: column;
+            width: 100%;
+            gap: 0;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+        .nav-links.open { display: flex !important; }
+        .nav-links li { width: 100%; }
+        .nav-links a { display: block; padding: 10px 0; }
+        .nav-links a.active { border-bottom: none; font-weight: 800; color: #007bff; }
+        .nav-toggle { display: flex; }
+
+        .page-container { margin: 20px auto; }
+        .page-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .page-header h2 { font-size: 1.4rem; }
+
+        .week-header { padding: 12px 14px; }
+        .week-range { font-size: 0.88rem; }
+        .week-header-right { flex-wrap: wrap; gap: 6px; }
+        .btn-forecast { padding: 5px 10px; font-size: 0.72rem; }
+        .week-body { padding: 0 12px 16px; }
+
+        table.sales-table th, table.sales-table td { padding: 8px 10px; font-size: 0.8rem; }
+        .manual-form-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .manual-grid { min-width: 480px; }
+        .manual-input { width: 60px; }
+
+        .modal-content { width: 95vw; }
+        .del-modal-box { width: 95%; padding: 20px; }
+    }
+
+    @media (max-width: 480px) {
+        .week-header { padding: 10px 12px; }
+        .week-header-left { flex-direction: column; align-items: flex-start; gap: 6px; }
+        .week-tag { font-size: 0.68rem; }
+    }
+
 </style>
 </head>
 <body>
 
-<!-- LOADING SCREEN -->
 <div id="loading-overlay">
     <div class="loader-container">
         <svg class="apparel-icon icon-shirt"  viewBox="0 0 512 512"><path d="M376,128H336V96a16,16,0,0,0-16-16H192a16,16,0,0,0-16,16v32H136a40,40,0,0,0-40,40v64a8,8,0,0,0,8,8h40V424a24,24,0,0,0,24,24H344a24,24,0,0,0,24-24V240h40a8,8,0,0,0,8-8V168A40,40,0,0,0,376,128Z"/></svg>
@@ -211,9 +263,9 @@
     <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
 </div>
 
-<!-- NAVBAR -->
 <div class="navbar">
     <h1>Sales</h1>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
     <ul class="nav-links">
         <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
         <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
@@ -224,7 +276,6 @@
     </ul>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="page-container">
     <div class="page-header">
         <div>
@@ -236,7 +287,6 @@
     </div>
 </div>
 
-<!-- RECEIPT MODAL -->
 <div class="modal-overlay" id="receiptModal">
     <div class="modal-content">
         <div class="receipt-paper" id="receiptContent"></div>
@@ -246,7 +296,6 @@
     </div>
 </div>
 
-<!-- DELETE MODAL -->
 <div class="del-modal-overlay" id="delModal">
     <div class="del-modal-box">
         <h3>🗑 Delete Sale Record?</h3>
@@ -394,12 +443,10 @@ function buildWeekCard(week, isCurrent) {
             <div class="week-tab"        onclick="switchTab('${cid}','manual',this)">✏️ Manual Entry</div>
         </div>
 
-        <!-- POS Tab -->
         <div class="tab-panel active" id="${cid}_pos">
             ${buildPosTab(wsStr, weStr, posAll, isCurrent)}
         </div>
 
-        <!-- Manual Tab -->
         <div class="tab-panel" id="${cid}_manual">
             ${buildManualTab(wsStr, week.start, getDailyPosTotals(week.start, week.end))}
         </div>
@@ -669,6 +716,13 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.opacity = '0';
         setTimeout(() => { overlay.style.visibility = 'hidden'; document.body.style.overflowY = 'auto'; }, 600);
     }, 2000);
+});
+</script>
+
+<script>
+// NAV TOGGLE
+document.getElementById('navToggle').addEventListener('click', function() {
+    document.querySelector('.nav-links').classList.toggle('open');
 });
 </script>
 </body>

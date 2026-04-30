@@ -8,15 +8,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* --- RESET & VARIABLES --- */
         :root {
             --color-text-main: #F7FAFC;
             --color-text-muted: #A0AEC0;
-            --color-input-bg: rgba(45, 55, 72, 0.6); /* Semi-transparent inputs */
+            --color-input-bg: rgba(45, 55, 72, 0.6); 
             --color-input-border: #4A5568;
             --color-accent: #FFFFFF;
             --color-danger: #FC8181;
         }
+
+        * { box-sizing: border-box; }
 
         body {
             font-family: 'Inter', sans-serif;
@@ -26,29 +27,22 @@
             justify-content: center;
             align-items: center;
             color: var(--color-text-main);
-            
-            /* BACKGROUND IMAGE WITH FADED BLACK OVERLAY */
-            /* Replace the URL below with: "{{ url_for('static', filename='your-bg-image.png') }}" */
+            padding: 20px;
             background: 
                 linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)),
                 url("{{ url_for('static', filename='test.gif') }}") no-repeat center center/cover;
         }
 
-        /* --- GLASS CARD STYLES --- */
         .login-container {
             width: 100%;
             max-width: 400px;
             padding: 40px;
-            
-            /* Glassmorphism Effect */
-            background-color: rgba(26, 32, 44, 0.65); /* Dark see-through bg */
-            backdrop-filter: blur(12px);               /* Blurs the image behind */
-            -webkit-backdrop-filter: blur(12px);       /* Safari support */
-            
+            background-color: rgba(26, 32, 44, 0.65); 
+            backdrop-filter: blur(12px);               
+            -webkit-backdrop-filter: blur(12px);       
             border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border highlight */
+            border: 1px solid rgba(255, 255, 255, 0.1); 
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
-            
             animation: fadeIn 0.8s ease-out;
         }
 
@@ -72,7 +66,6 @@
             margin-bottom: 35px;
         }
 
-        /* --- FORM GROUPS --- */
         .form-group {
             margin-bottom: 25px;
             position: relative;
@@ -89,7 +82,6 @@
             transition: color 0.3s;
         }
 
-        /* Wrapper to position the eye icon */
         .input-wrapper {
             position: relative;
         }
@@ -113,12 +105,10 @@
             box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
         }
 
-        /* Input Label Highlight on Focus (via sibling selector) */
         .form-group:focus-within label {
             color: var(--color-accent);
         }
 
-        /* --- PASSWORD TOGGLE ICON --- */
         .toggle-password {
             position: absolute;
             right: 15px;
@@ -132,11 +122,8 @@
             display: flex;
             align-items: center;
         }
-        .toggle-password:hover {
-            color: white;
-        }
+        .toggle-password:hover { color: white; }
 
-        /* --- BUTTON STYLES --- */
         .btn-login {
             width: 100%;
             padding: 14px;
@@ -155,12 +142,7 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 255, 255, 0.15);
         }
-
-        .btn-login:active {
-            transform: translateY(0);
-        }
-
-        /* Loading State for Button */
+        .btn-login:active { transform: translateY(0); }
         .btn-login:disabled {
             background-color: #718096;
             cursor: not-allowed;
@@ -168,7 +150,6 @@
             box-shadow: none;
         }
 
-        /* --- ERROR MESSAGE --- */
         .error-message {
             background-color: rgba(252, 129, 129, 0.15);
             border: 1px solid var(--color-danger);
@@ -184,6 +165,14 @@
             gap: 8px;
         }
 
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 28px 20px;
+            }
+            .login-container h2 {
+                font-size: 1.5em;
+            }
+        }
     </style>
 </head>
 <body>
@@ -223,7 +212,6 @@
     </div>
 
     <script>
-        // 1. Password Toggle Logic
         const toggleBtn = document.getElementById('toggleBtn');
         const passwordInput = document.getElementById('password');
         const eyeIcon = document.getElementById('eyeIcon');
@@ -232,8 +220,6 @@
         toggleBtn.addEventListener('click', () => {
             const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
             passwordInput.setAttribute('type', type);
-            
-            // Toggle Icons
             if (type === 'text') {
                 eyeIcon.style.display = 'none';
                 eyeOffIcon.style.display = 'block';
@@ -243,13 +229,9 @@
             }
         });
 
-        // 2. Form Loading State Logic
         const form = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
-
         form.addEventListener('submit', (e) => {
-            // Don't preventDefault, let the form submit to Flask
-            // Just update the UI immediately
             if (form.checkValidity()) {
                 loginBtn.disabled = true;
                 loginBtn.innerText = 'Authenticating...';

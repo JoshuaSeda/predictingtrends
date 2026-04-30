@@ -34,7 +34,6 @@
     .nav-links a { text-decoration: none; color: #1c1c1c; font-weight: 600; padding: 5px 0; }
     .nav-links a.active { border-bottom: 3px solid #1c1c1c; }
 
-    /* ── WEEK SELECTOR BAR ── */
     .week-selector-bar {
         display: flex;
         align-items: center;
@@ -133,7 +132,6 @@
     }
     .btn-outline:hover { background: #007bff; color: #fff; }
 
-    /* Prediction Table */
     .pred-table {
         width: 100%;
         border-collapse: collapse;
@@ -165,12 +163,10 @@
     .pred-table tr.summary-row td.cat-shorts  { color: #a5d6a7; }
     .pred-table tr.summary-row td.total-col   { color: #fff; }
 
-    /* Legend Pills */
     .legend-pills { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
     .legend-pill { display: flex; align-items: center; gap: 7px; font-size: 0.83rem; font-weight: 600; }
     .pill-dot { width: 13px; height: 13px; border-radius: 3px; display: inline-block; }
 
-    /* ── ARIMA PARAMS PANEL ── */
     .params-panel {
         background: #f8f9fa;
         border: 1px solid #e0e0e0;
@@ -203,7 +199,6 @@
     .param-value { font-size: 0.95rem; font-weight: 800; color: #1c1c1c; font-family: 'Space Mono', monospace; }
     .param-sub   { font-size: 0.72rem; color: #aaa; margin-top: 2px; }
 
-    /* MODAL */
     .modal-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0,0,0,0.55);
@@ -252,7 +247,6 @@
     }
     .modal-footer { padding: 14px 28px; border-top: 1px solid #eee; text-align: right; }
 
-    /* ── SUMMARY EXPLANATION STYLES ── */
     .explain-step {
         border: 1px solid #eee;
         border-radius: 10px;
@@ -299,7 +293,74 @@
     }
     .step-row-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; font-weight: 700; font-size: 0.88rem; }
 
-    /* LOADING SCREEN */
+
+    /* ---- RESPONSIVE ---- */
+    .nav-toggle {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 5px;
+        flex-direction: column;
+        gap: 5px;
+    }
+    .nav-toggle span {
+        display: block;
+        width: 25px;
+        height: 2px;
+        background: #1c1c1c;
+        border-radius: 2px;
+    }
+
+    @media (max-width: 768px) {
+        body { overflow: auto !important; overflow-x: hidden; }
+        .navbar { padding: 15px 20px; flex-wrap: wrap; }
+        .navbar h1 { font-size: 1.3em; }
+        .nav-links {
+            display: none !important;
+            flex-direction: column;
+            width: 100%;
+            gap: 0;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            margin-top: 10px;
+        }
+        .nav-links.open { display: flex !important; }
+        .nav-links li { width: 100%; }
+        .nav-links a { display: block; padding: 10px 0; }
+        .nav-links a.active { border-bottom: none; font-weight: 800; color: #007bff; }
+        .nav-toggle { display: flex; }
+
+        .page-container { margin: 20px auto; padding: 0 14px 40px; }
+        h2 { font-size: 1.5rem; }
+        .subtitle { font-size: 0.85rem; }
+
+        .week-selector-bar { padding: 12px 14px; gap: 10px; }
+        .week-selector-bar select { min-width: 100%; }
+
+        .chart-card { padding: 18px 16px; }
+        .chart-card canvas { max-height: 260px; }
+
+        .predict-controls { flex-direction: column; align-items: flex-start; }
+        .predict-controls select { width: 100%; }
+
+        .params-grid { grid-template-columns: 1fr 1fr; }
+        .pred-table th, .pred-table td { padding: 8px 10px; font-size: 0.8rem; }
+        .day-chips { gap: 6px; }
+        .day-chip { min-width: 44px; padding: 6px 8px; }
+        .chip-val { font-size: 0.88rem; }
+
+        .modal-content { max-width: 98vw; max-height: 95vh; }
+        .modal-body { padding: 16px 18px; }
+    }
+
+    @media (max-width: 480px) {
+        .params-grid { grid-template-columns: 1fr; }
+        h2 { font-size: 1.3rem; }
+        .pred-table { font-size: 0.78rem; }
+        .legend-pills { gap: 10px; }
+    }
+
     #loading-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
         background-color: #f4f7f9;
@@ -321,7 +382,6 @@
 </head>
 <body>
 
-<!-- LOADING SCREEN -->
 <div id="loading-overlay">
     <div class="loader-container">
         <svg class="apparel-icon icon-shirt" viewBox="0 0 512 512">
@@ -338,9 +398,9 @@
     <div class="progress-container"><div class="progress-bar" id="progress-bar"></div></div>
 </div>
 
-<!-- NAVBAR -->
 <div class="navbar">
     <h1>Forecast</h1>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation"><span></span><span></span><span></span></button>
     <ul class="nav-links">
         <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
         <li><a href="{{ url_for('inventory') }}">Inventory</a></li>
@@ -351,12 +411,10 @@
     </ul>
 </div>
 
-<!-- MAIN CONTENT -->
 <div class="page-container">
     <h2>Sales Forecast</h2>
     <p class="subtitle">Select a week to view its sales and predict future demand.</p>
 
-    <!-- ── WEEK SELECTOR ── -->
     <div class="week-selector-bar">
         <label for="weekSelect">📆 Viewing week:</label>
         <select id="weekSelect" onchange="navigateToWeek(this.value)">
@@ -374,7 +432,6 @@
         {% endif %}
     </div>
 
-    <!-- SECTION 1: BAR CHART -->
     <div class="chart-card">
         <h3>📊 Actual Sales — {{ date_range_label }}</h3>
         <div class="legend-pills">
@@ -385,7 +442,6 @@
         <canvas id="salesBarChart" height="340"></canvas>
     </div>
 
-    <!-- SECTION 2: PREDICTOR -->
     <div class="chart-card">
         <h3>🔮 Predict Future Sales</h3>
         <p class="card-sub">Based on the 7 days shown above. Click <strong>📋 How it works</strong> to see the calculation explained simply.</p>
@@ -424,7 +480,6 @@
     </div>
 </div>
 
-<!-- HOW IT WORKS MODAL -->
 <div class="modal-overlay" id="summaryModal" onclick="handleModalClick(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
         <div class="modal-header">
@@ -606,11 +661,6 @@ new Chart(barCtx, {
 const EMA_ALPHA = 0.4;   // 40% new day, 60% carry-forward — all 7 days contribute
 const PHI_FIXED = 0.300; // momentum factor (how strongly we follow recent direction)
 
-/**
- * Compute Exponential Moving Average for an array of values.
- * Returns an array of the same length where each entry is the
- * smoothed value that incorporates ALL previous days.
- */
 function computeEMA(data, alpha) {
     if (!data.length) return [];
     const ema = [data[0]];
@@ -620,10 +670,6 @@ function computeEMA(data, alpha) {
     return ema;
 }
 
-/**
- * Compute μ (mu): the average daily change across all 7 days.
- * This uses EVERY day, not just the last two.
- */
 function computeMu(data) {
     if (data.length < 2) return 0;
     let sum = 0;
@@ -631,14 +677,6 @@ function computeMu(data) {
     return sum / (data.length - 1);
 }
 
-/**
- * Forecast `steps` days ahead.
- *
- * Seed = EMA smoothed values (reflect ALL 7 days, not just the last).
- * Each step: nextVal = prevVal + mu + phi × (prevVal - prevPrevVal)
- *
- * Returns array of { raw, rounded, ema_prev, ema_prevPrev, mu, momentum } per step.
- */
 function runForecast(data, steps) {
     if (data.length < 2) {
         return Array.from({ length: steps }, () => ({ raw: 0, rounded: 0, mu: 0, momentum: 0, ema_prev: 0, ema_prevPrev: 0 }));
@@ -950,6 +988,12 @@ function showSummary() {
 
 function closeSummary() { document.getElementById('summaryModal').style.display = 'none'; }
 function handleModalClick(e) { if (e.target === document.getElementById('summaryModal')) closeSummary(); }
+</script>
+
+<script>
+document.getElementById('navToggle').addEventListener('click', function() {
+    document.querySelector('.nav-links').classList.toggle('open');
+});
 </script>
 </body>
 </html>
